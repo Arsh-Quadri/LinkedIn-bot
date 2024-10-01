@@ -131,6 +131,10 @@ export default defineContentScript({
           alert("Please enter a prompt.");
           return;
         }
+
+        const generateBtn = document.getElementById('generate-btn') as HTMLButtonElement;
+        generateBtn.innerText = 'Generating...';
+        generateBtn.disabled = true;
       
         try {
           const options = {

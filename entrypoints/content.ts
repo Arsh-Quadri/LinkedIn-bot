@@ -141,7 +141,7 @@ export default defineContentScript({
             method: 'POST',
             url: 'https://open-ai21.p.rapidapi.com/chatgpt',
             headers: {
-              'x-rapidapi-key': 'a6f5651026msh6591c3b9c4064a9p1edcf1jsne4593f6b4b81',
+              'x-rapidapi-key': process.env.RAPID_API_KEY,
               'x-rapidapi-host': 'open-ai21.p.rapidapi.com',
               'Content-Type': 'application/json'
             },

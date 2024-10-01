@@ -1,3 +1,4 @@
+import axios from 'axios';
 export default defineContentScript({
   matches: ['*://www.linkedin.com/*'],
   main() {
@@ -62,7 +63,7 @@ export default defineContentScript({
           color: black;
         ">
           <div id="modal-content" style="
-            background-color: #F9FAFB; 
+            background-color: #1a202c; 
             padding: 15px; 
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             z-index: 10001;
@@ -72,7 +73,7 @@ export default defineContentScript({
           ">
             <style>
                 #ai-input::placeholder {
-                    color: #666D80; 
+                    color: #cbd5e0; 
                 }
                 #ai-input {
       outline: none;
@@ -80,21 +81,21 @@ export default defineContentScript({
             </style>
             <div id="chat-container" style="display: none; flex-direction: column; max-height: 300px; overflow-y: auto;">
               <div id="user-prompt" style="margin-bottom: 10px;">
-    <p id="prompt-text" style="color: black; max-width: 80%; width: fit-content; background-color: #DFE1E7; padding: 4px 8px; border-radius: 4px; display: inline-block; float: right;"></p>
+    <p id="prompt-text" style="color: black; max-width: 80%; width: fit-content; background-color: #DFE1E7; padding: 4px 8px; border-radius: 4px; display: inline-block; float: right; font-weight: 500;"></p>
 </div>
 <div id="ai-response" style="margin-bottom: 10px;">
-    <p id="response-text" style="color: black; max-width: 80%; width: fit-content; background-color: #DBEAFE; padding: 4px 8px; border-radius: 4px; display: inline-block; float: left;"></p>
+    <p id="response-text" style="color: black; max-width: 80%; width: fit-content; background-color: #DBEAFE; padding: 4px 8px; border-radius: 4px; display: inline-block; float: left; font-weight: 500;"></p>
 </div>
 
             </div>
             <input id="ai-input" type="text" placeholder="Your Prompt" style="
               width: 100%;
               padding: 10px;
-              border: 1px solid #666D80;
+              background-color: #2d3748;
               border-radius: 6px;
               margin-bottom: 10px;
               outline: none;
-              color: black;
+              color: #cbd5e0;
               font-size: 16px;
             "/>
             <button id="generate-btn" style="
@@ -122,11 +123,47 @@ export default defineContentScript({
       });
 
       // Handle Generate Button Click
-      document.getElementById('generate-btn')?.addEventListener('click', () => {
+      document.getElementById('generate-btn')?.addEventListener('click', async () => {
         const userInput = (document.getElementById('ai-input') as HTMLInputElement).value;
-        const response = "Thank you for the opportunity! If you have any more questions or if there's anything else I can help you with, feel free to ask.";
-        displayChat(userInput, response);
+      
+        // Make sure user input is not empty
+        if (!userInput) {
+          alert("Please enter a prompt.");
+          return;
+        }
+      
+        try {
+          const options = {
+            method: 'POST',
+            url: 'https://open-ai21.p.rapidapi.com/chatgpt',
+            headers: {
+              'x-rapidapi-key': 'a6f5651026msh6591c3b9c4064a9p1edcf1jsne4593f6b4b81',
+              'x-rapidapi-host': 'open-ai21.p.rapidapi.com',
+              'Content-Type': 'application/json'
+            },
+            data: {
+              messages: [
+                {
+                  role: 'user',
+                  content: `User Input: "Set up a meeting to discuss project updates."
 
+AI Output: "Please schedule a meeting to review the latest project updates and discuss any necessary adjustments or next steps. This will ensure that all team members are aligned and any issues are addressed promptly." take this as a example and generate result for this message: "${userInput}". Avoid unnecessary formatting or over-elaboration. The result should read smoothly and naturally.`,
+                }
+              ],
+              web_access: false
+            }
+          };
+      
+          const response = await axios.request(options);
+          let aiResponse = response.data.result; // Adjust according to API response structure
+          aiResponse = aiResponse.replace(/^"(.*)"$/, '$1');
+          // Display AI-generated response
+          displayChat(userInput, aiResponse);
+        } catch (error) {
+          console.error("Error fetching AI response:", error);
+          alert("Failed to generate a response. Please try again later.");
+        }
+      
         // Clear the input field after generating the response
         (document.getElementById('ai-input') as HTMLInputElement).value = '';
       });
@@ -154,8 +191,8 @@ export default defineContentScript({
         <div style="display: flex; gap: 10px; float: right; margin-top: 10px;">
     <button id="insert-btn" style="
         background-color: transparent;
-        color: #666D80;
-        border: 2px solid #666D80;
+        color: #cbd5e0;
+        border: 2px solid #cbd5e0;
         padding: 7px 11px;
         border-radius: 6px;
         cursor: pointer;
